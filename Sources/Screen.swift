@@ -11,7 +11,23 @@ public final class Screen {
         return Window(native: native.pointee.root)
     }
 
-    public var rootVisual: xcb_visualid_t {
-        return native.pointee.root_visual
+    public var rootVisual: VisualID {
+        return VisualID(native: native.pointee.root_visual)
+    }
+
+    public var whitePixel: UInt32 {
+        return native.pointee.white_pixel
+    }
+
+    public var blackPixel: UInt32 {
+        return native.pointee.black_pixel
+    }
+
+    public var widthInPixels: UInt16 {
+        return native.pointee.width_in_pixels
+    }
+
+    public var heightInPixels: UInt16 {
+        return native.pointee.height_in_pixels
     }
 }

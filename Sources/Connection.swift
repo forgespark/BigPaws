@@ -1,10 +1,13 @@
 import SwiftXCB
 
 public final class Connection {
+    private let preferredScreen: Int32
     private let native: OpaquePointer!
 
-    public init() {
-        self.native = xcb_connect(nil, nil)
+    public init(display: String? = nil, usePreferredScreen: Bool = false) {
+        var screen: Int32 = 0
+        self.native = xcb_connect(display, &screen)
+        self.preferredScreen = screen
 
         if self.native == nil {
             fatalError("Unable to create XCB connection")
@@ -23,22 +26,25 @@ public final class Connection {
         xcb_flush(native)
     }
 
-    public func createWindow(parent: Window, visual: xcb_visualid_t) -> Window {
+    public func createWindow(depth: UInt8 = UInt8(XCB_COPY_FROM_PARENT), parent: Window, x: Int16, y: Int16, width: UInt16, height: UInt16, borderWidth: UInt16, windowClass: WindowClass = .inputOutput, visual: VisualID, flags: Set<WindowFlag>) -> Window {
         let window = Window(native: xcb_generate_id(native))
+        let valueMask = flags.map({ $0.native.rawValue }).reduce(UInt32(0), { $0 | $1 })
+        let valueList = flags.sorted(by: { $0.native.rawValue < $1.native.rawValue }).map({ $0.value })
+
         xcb_create_window(
             native,
-            UInt8(XCB_COPY_FROM_PARENT),
+            depth,
             window.native,
             parent.native,
-            0,
-            0,
-            150,
-            150,
-            10,
-            UInt16(XCB_WINDOW_CLASS_INPUT_OUTPUT.rawValue),
-            visual,
-            0,
-            nil
+            x,
+            y,
+            width,
+            height,
+            borderWidth,
+            windowClass.native,
+            visual.native,
+            valueMask,
+            valueList
         )
 
         return window
