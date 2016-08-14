@@ -2,7 +2,7 @@ import SwiftXCB
 
 public final class Connection {
     private let preferredScreen: Int32
-    private let native: OpaquePointer!
+    internal let native: OpaquePointer!
 
     public init(display: String? = nil, usePreferredScreen: Bool = false) {
         var screen: Int32 = 0
@@ -19,7 +19,7 @@ public final class Connection {
     }
 
     public func getSetup() -> Setup {
-        return Setup(native: xcb_get_setup(native))
+        return Setup(connection: self, native: xcb_get_setup(native))
     }
 
     public func flush() {
@@ -27,7 +27,7 @@ public final class Connection {
     }
 
     public func createWindow(depth: UInt8 = UInt8(XCB_COPY_FROM_PARENT), parent: Window, x: Int16, y: Int16, width: UInt16, height: UInt16, borderWidth: UInt16, windowClass: WindowClass = .inputOutput, visual: VisualID, flags: Set<WindowFlag>) -> Window {
-        let window = Window(native: xcb_generate_id(native))
+        let window = Window(connection: self, native: xcb_generate_id(native))
         let valueMask = flags.map({ $0.native.rawValue }).reduce(UInt32(0), { $0 | $1 })
         let valueList = flags.sorted(by: { $0.native.rawValue < $1.native.rawValue }).map({ $0.value })
 
@@ -50,7 +50,11 @@ public final class Connection {
         return window
     }
 
-    public func mapWindow(_ window: Window) {
-        xcb_map_window(native, window.native)
+    public func internAtomOnlyIfExists(name: String) -> InternAtomRequest {
+        return InternAtomRequest(connection: self, onlyIfExists: true, name: name)
+    }
+
+    public func internAtom(name: String) -> InternAtomRequest {
+        return InternAtomRequest(connection: self, onlyIfExists: false, name: name)
     }
 }

@@ -2,3 +2,12 @@
 /.build
 /Packages
 /*.xcodeproj
+.idea/workspace.xml
+.idea/tasks.xml
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
